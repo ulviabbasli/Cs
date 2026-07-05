@@ -4,11 +4,143 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/Cs/engine/assets/hl-bright-BcANNclR.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebXash</title>
+    <title>WebXash - CS 1.6</title>
     <script type="module" crossorigin src="/Cs/engine/assets/index-qQhwzMp6.js"></script>
     <link rel="stylesheet" crossorigin href="/Cs/engine/assets/index-b_7h_EiO.css">
+    <style>
+      #auto-loader-overlay {
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92); z-index: 99999;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        font-family: 'Segoe UI', Arial, sans-serif; color: #39ff14;
+      }
+      #auto-loader-overlay h2 { margin-bottom: 20px; font-size: 28px; }
+      #auto-loader-overlay .progress-bar-bg {
+        width: 400px; height: 24px; background: #1a1a2e; border: 1px solid #39ff14;
+        border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+      }
+      #auto-loader-overlay .progress-bar-fill {
+        height: 100%; background: linear-gradient(90deg, #39ff14, #00e676);
+        width: 0%; transition: width 0.3s; border-radius: 12px;
+      }
+      #auto-loader-overlay .status { color: #ccc; font-size: 14px; }
+      #auto-loader-overlay .error { color: #ff4444; font-size: 14px; margin-top: 10px; }
+      #auto-loader-overlay button {
+        margin-top: 20px; padding: 12px 32px; font-size: 18px; font-weight: bold;
+        background: #39ff14; color: #000; border: none; border-radius: 8px; cursor: pointer;
+      }
+      #auto-loader-overlay button:hover { background: #00e676; }
+    </style>
   </head>
   <body>
     <div id="app"></div>
+
+    <div id="auto-loader-overlay">
+      <h2>🎮 COUNTER-STRIKE 1.6</h2>
+      <p style="color:#aaa; margin-bottom:30px;">Brauzerdə birbaşa oyna — heç nə yükləmə!</p>
+      <button id="btn-auto-start" onclick="startAutoLoad()">▶ OYUNU BAŞLAT</button>
+      <div class="progress-bar-bg" id="progress-bg" style="display:none;">
+        <div class="progress-bar-fill" id="progress-fill"></div>
+      </div>
+      <div class="status" id="loader-status"></div>
+      <div class="error" id="loader-error"></div>
+    </div>
+
+    <script>
+      async function startAutoLoad() {
+        const btn = document.getElementById('btn-auto-start');
+        const progressBg = document.getElementById('progress-bg');
+        const progressFill = document.getElementById('progress-fill');
+        const status = document.getElementById('loader-status');
+        const errorDiv = document.getElementById('loader-error');
+        const overlay = document.getElementById('auto-loader-overlay');
+
+        btn.style.display = 'none';
+        progressBg.style.display = 'block';
+        status.textContent = 'Oyun faylları aşkarlanır...';
+
+        try {
+          // 1. Discover how many parts exist
+          let partsCount = 0;
+          for (let i = 1; i <= 30; i++) {
+            const check = await fetch('/Cs/engine/cs/game_part_' + i + '.bin', { method: 'HEAD' });
+            if (check.ok) {
+              partsCount = i;
+            } else {
+              break;
+            }
+          }
+
+          if (partsCount === 0) {
+            errorDiv.textContent = 'Oyun faylları tapılmadı (game_part_*.bin yoxdur)!';
+            btn.style.display = 'block';
+            btn.textContent = 'Yenidən Cəhd Et';
+            return;
+          }
+
+          status.textContent = partsCount + ' hissə tapıldı. Yüklənir...';
+
+          // 2. Download all parts
+          const buffers = [];
+          for (let i = 1; i <= partsCount; i++) {
+            status.textContent = 'Hissə ' + i + '/' + partsCount + ' yüklənir...';
+            const percent = Math.round(((i - 1) / partsCount) * 90);
+            progressFill.style.width = percent + '%';
+
+            const res = await fetch('/Cs/engine/cs/game_part_' + i + '.bin');
+            if (!res.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi!');
+            const buf = await res.arrayBuffer();
+            buffers.push(new Uint8Array(buf));
+          }
+
+          progressFill.style.width = '92%';
+          status.textContent = 'Hissələr birləşdirilir...';
+
+          // 3. Merge all parts into one blob
+          let totalLength = 0;
+          for (const b of buffers) totalLength += b.length;
+          const merged = new Uint8Array(totalLength);
+          let offset = 0;
+          for (const b of buffers) {
+            merged.set(b, offset);
+            offset += b.length;
+          }
+
+          const blob = new Blob([merged], { type: 'application/zip' });
+          const file = new File([blob], 'cstrike.zip', { type: 'application/zip' });
+
+          progressFill.style.width = '95%';
+          status.textContent = 'Oyun mühərrikinə ötürülür...';
+
+          // 4. Wait for Vue app to mount and find the ZIP input
+          await new Promise(resolve => setTimeout(resolve, 500));
+
+          const fileInput = document.querySelector('input[type="file"][accept=".zip"]');
+          if (!fileInput) {
+            throw new Error('Mühərrikin fayl yükləyicisi tapılmadı!');
+          }
+
+          // 5. Programmatically set the file on the input
+          const dt = new DataTransfer();
+          dt.items.add(file);
+          fileInput.files = dt.files;
+          fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+          progressFill.style.width = '100%';
+          status.textContent = 'Oyun başladılır...';
+
+          // 6. Hide overlay after a short delay
+          setTimeout(() => {
+            overlay.style.display = 'none';
+          }, 2000);
+
+        } catch (err) {
+          errorDiv.textContent = 'Xəta: ' + err.message;
+          btn.style.display = 'block';
+          btn.textContent = 'Yenidən Cəhd Et';
+          progressBg.style.display = 'none';
+        }
+      }
+    </script>
   </body>
 </html>
