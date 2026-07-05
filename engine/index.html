@@ -5,142 +5,180 @@
     <link rel="icon" type="image/svg+xml" href="/Cs/engine/assets/hl-bright-BcANNclR.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WebXash - CS 1.6</title>
-    <script type="module" crossorigin src="/Cs/engine/assets/index-qQhwzMp6.js"></script>
+    <!-- NOTE: Vue app script is NOT loaded here. It will be loaded dynamically after game files are ready. -->
     <link rel="stylesheet" crossorigin href="/Cs/engine/assets/index-b_7h_EiO.css">
     <style>
-      #auto-loader-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.92); z-index: 99999;
+      body, html { margin: 0; padding: 0; background: #0a0a0a; overflow: hidden; }
+      #loader-screen {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
+        z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-family: 'Segoe UI', Arial, sans-serif; color: #39ff14;
+        font-family: 'Segoe UI', Arial, sans-serif; color: #e0e0e0;
       }
-      #auto-loader-overlay h2 { margin-bottom: 20px; font-size: 28px; }
-      #auto-loader-overlay .progress-bar-bg {
-        width: 400px; height: 24px; background: #1a1a2e; border: 1px solid #39ff14;
-        border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+      #loader-screen h1 {
+        font-size: 36px; color: #39ff14; text-shadow: 0 0 20px rgba(57,255,20,0.4);
+        margin-bottom: 8px;
       }
-      #auto-loader-overlay .progress-bar-fill {
-        height: 100%; background: linear-gradient(90deg, #39ff14, #00e676);
-        width: 0%; transition: width 0.3s; border-radius: 12px;
+      #loader-screen .subtitle { color: #888; font-size: 14px; margin-bottom: 40px; }
+      #loader-screen .start-btn {
+        padding: 16px 48px; font-size: 20px; font-weight: bold;
+        background: linear-gradient(135deg, #39ff14, #00e676); color: #000;
+        border: none; border-radius: 12px; cursor: pointer;
+        box-shadow: 0 4px 30px rgba(57,255,20,0.3);
+        transition: transform 0.2s, box-shadow 0.2s;
       }
-      #auto-loader-overlay .status { color: #ccc; font-size: 14px; }
-      #auto-loader-overlay .error { color: #ff4444; font-size: 14px; margin-top: 10px; }
-      #auto-loader-overlay button {
-        margin-top: 20px; padding: 12px 32px; font-size: 18px; font-weight: bold;
-        background: #39ff14; color: #000; border: none; border-radius: 8px; cursor: pointer;
+      #loader-screen .start-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 6px 40px rgba(57,255,20,0.5);
       }
-      #auto-loader-overlay button:hover { background: #00e676; }
+      #loader-screen .start-btn:disabled {
+        background: #333; color: #666; cursor: not-allowed;
+        box-shadow: none; transform: none;
+      }
+      .progress-container { width: 420px; margin-top: 30px; display: none; }
+      .progress-bg {
+        width: 100%; height: 22px; background: #1a1a2e;
+        border: 1px solid #39ff14; border-radius: 11px; overflow: hidden;
+      }
+      .progress-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, #39ff14, #00e676);
+        border-radius: 11px; transition: width 0.3s ease;
+      }
+      .status-text { color: #aaa; font-size: 13px; margin-top: 10px; text-align: center; }
+      .error-text { color: #ff4444; font-size: 13px; margin-top: 8px; text-align: center; }
     </style>
   </head>
   <body>
     <div id="app"></div>
 
-    <div id="auto-loader-overlay">
-      <h2>🎮 COUNTER-STRIKE 1.6</h2>
-      <p style="color:#aaa; margin-bottom:30px;">Brauzerdə birbaşa oyna — heç nə yükləmə!</p>
-      <button id="btn-auto-start" onclick="startAutoLoad()">▶ OYUNU BAŞLAT</button>
-      <div class="progress-bar-bg" id="progress-bg" style="display:none;">
-        <div class="progress-bar-fill" id="progress-fill"></div>
+    <div id="loader-screen">
+      <h1>🎮 COUNTER-STRIKE 1.6</h1>
+      <p class="subtitle">Brauzerdə birbaşa oyna — heç nə yükləmədən!</p>
+      <button class="start-btn" id="startBtn" onclick="window._startGame()">▶ OYUNU BAŞLAT</button>
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bg">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="status-text" id="statusText"></div>
+        <div class="error-text" id="errorText"></div>
       </div>
-      <div class="status" id="loader-status"></div>
-      <div class="error" id="loader-error"></div>
     </div>
 
     <script>
-      async function startAutoLoad() {
-        const btn = document.getElementById('btn-auto-start');
-        const progressBg = document.getElementById('progress-bg');
-        const progressFill = document.getElementById('progress-fill');
-        const status = document.getElementById('loader-status');
-        const errorDiv = document.getElementById('loader-error');
-        const overlay = document.getElementById('auto-loader-overlay');
+      // This runs immediately, before any module scripts
+      window._startGame = async function() {
+        var btn = document.getElementById('startBtn');
+        var progContainer = document.getElementById('progressContainer');
+        var progFill = document.getElementById('progressFill');
+        var statusEl = document.getElementById('statusText');
+        var errorEl = document.getElementById('errorText');
 
-        btn.style.display = 'none';
-        progressBg.style.display = 'block';
-        status.textContent = 'Oyun faylları aşkarlanır...';
+        btn.disabled = true;
+        btn.textContent = 'Yüklənir...';
+        progContainer.style.display = 'block';
+        statusEl.textContent = 'Oyun faylları axtarılır...';
+        errorEl.textContent = '';
 
         try {
-          // 1. Discover how many parts exist
-          let partsCount = 0;
-          for (let i = 1; i <= 30; i++) {
-            const check = await fetch('/Cs/engine/cs/game_part_' + i + '.bin', { method: 'HEAD' });
-            if (check.ok) {
-              partsCount = i;
-            } else {
+          // Step 1: Discover how many parts exist
+          var partsCount = 0;
+          for (var i = 1; i <= 30; i++) {
+            try {
+              var check = await fetch('/Cs/engine/cs/game_part_' + i + '.bin', { method: 'HEAD' });
+              if (check.ok) {
+                partsCount = i;
+              } else {
+                break;
+              }
+            } catch(e) {
               break;
             }
           }
 
           if (partsCount === 0) {
-            errorDiv.textContent = 'Oyun faylları tapılmadı (game_part_*.bin yoxdur)!';
-            btn.style.display = 'block';
-            btn.textContent = 'Yenidən Cəhd Et';
-            return;
+            throw new Error('Oyun faylları tapılmadı! (game_part_*.bin mövcud deyil)');
           }
 
-          status.textContent = partsCount + ' hissə tapıldı. Yüklənir...';
+          statusEl.textContent = partsCount + ' hissə tapıldı. Yüklənir...';
 
-          // 2. Download all parts
-          const buffers = [];
-          for (let i = 1; i <= partsCount; i++) {
-            status.textContent = 'Hissə ' + i + '/' + partsCount + ' yüklənir...';
-            const percent = Math.round(((i - 1) / partsCount) * 90);
-            progressFill.style.width = percent + '%';
+          // Step 2: Download all parts
+          var buffers = [];
+          var totalBytes = 0;
+          for (var i = 1; i <= partsCount; i++) {
+            statusEl.textContent = 'Hissə ' + i + '/' + partsCount + ' yüklənir...';
+            progFill.style.width = Math.round(((i - 1) / partsCount) * 85) + '%';
 
-            const res = await fetch('/Cs/engine/cs/game_part_' + i + '.bin');
-            if (!res.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi!');
-            const buf = await res.arrayBuffer();
+            var res = await fetch('/Cs/engine/cs/game_part_' + i + '.bin');
+            if (!res.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi (HTTP ' + res.status + ')');
+            var buf = await res.arrayBuffer();
             buffers.push(new Uint8Array(buf));
+            totalBytes += buf.byteLength;
           }
 
-          progressFill.style.width = '92%';
-          status.textContent = 'Hissələr birləşdirilir...';
+          progFill.style.width = '88%';
+          statusEl.textContent = 'Hissələr birləşdirilir (' + Math.round(totalBytes / 1048576) + ' MB)...';
 
-          // 3. Merge all parts into one blob
-          let totalLength = 0;
-          for (const b of buffers) totalLength += b.length;
-          const merged = new Uint8Array(totalLength);
-          let offset = 0;
-          for (const b of buffers) {
-            merged.set(b, offset);
-            offset += b.length;
+          // Step 3: Merge all parts into one ZIP
+          var merged = new Uint8Array(totalBytes);
+          var offset = 0;
+          for (var j = 0; j < buffers.length; j++) {
+            merged.set(buffers[j], offset);
+            offset += buffers[j].length;
+          }
+          buffers = null; // Free memory
+
+          progFill.style.width = '92%';
+          statusEl.textContent = 'WebXash mühərriki yüklənir...';
+
+          // Step 4: Load the Vue/WebXash app dynamically
+          var script = document.createElement('script');
+          script.type = 'module';
+          script.crossOrigin = '';
+          script.src = '/Cs/engine/assets/index-qQhwzMp6.js';
+          document.head.appendChild(script);
+
+          // Step 5: Wait for Vue app to mount and the file input to appear
+          var fileInput = null;
+          for (var attempt = 0; attempt < 50; attempt++) {
+            await new Promise(function(r) { setTimeout(r, 200); });
+            fileInput = document.querySelector('input[type="file"][accept=".zip"]');
+            if (fileInput) break;
           }
 
-          const blob = new Blob([merged], { type: 'application/zip' });
-          const file = new File([blob], 'cstrike.zip', { type: 'application/zip' });
-
-          progressFill.style.width = '95%';
-          status.textContent = 'Oyun mühərrikinə ötürülür...';
-
-          // 4. Wait for Vue app to mount and find the ZIP input
-          await new Promise(resolve => setTimeout(resolve, 500));
-
-          const fileInput = document.querySelector('input[type="file"][accept=".zip"]');
           if (!fileInput) {
-            throw new Error('Mühərrikin fayl yükləyicisi tapılmadı!');
+            throw new Error('Mühərrik yükləndi amma fayl girişi tapılmadı!');
           }
 
-          // 5. Programmatically set the file on the input
-          const dt = new DataTransfer();
+          progFill.style.width = '96%';
+          statusEl.textContent = 'Oyun mühərrikə ötürülür...';
+
+          // Step 6: Create File object and trigger the Open ZIP handler
+          var blob = new Blob([merged], { type: 'application/zip' });
+          merged = null; // Free memory
+          var file = new File([blob], 'cstrike.zip', { type: 'application/zip' });
+
+          var dt = new DataTransfer();
           dt.items.add(file);
           fileInput.files = dt.files;
           fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 
-          progressFill.style.width = '100%';
-          status.textContent = 'Oyun başladılır...';
+          progFill.style.width = '100%';
+          statusEl.textContent = 'Oyun başladılır! Bir neçə saniyə gözləyin...';
 
-          // 6. Hide overlay after a short delay
-          setTimeout(() => {
-            overlay.style.display = 'none';
-          }, 2000);
+          // Step 7: Hide loader after engine takes over
+          setTimeout(function() {
+            document.getElementById('loader-screen').style.display = 'none';
+          }, 3000);
 
-        } catch (err) {
-          errorDiv.textContent = 'Xəta: ' + err.message;
-          btn.style.display = 'block';
-          btn.textContent = 'Yenidən Cəhd Et';
-          progressBg.style.display = 'none';
+        } catch(err) {
+          errorEl.textContent = 'Xəta: ' + err.message;
+          btn.disabled = false;
+          btn.textContent = '🔄 Yenidən Cəhd Et';
+          progContainer.style.display = 'none';
         }
-      }
+      };
     </script>
   </body>
 </html>
