@@ -151,6 +151,20 @@
             throw new Error('Mühərrik yükləndi amma fayl girişi tapılmadı!');
           }
 
+          progFill.style.width = '94%';
+          statusEl.textContent = 'Counter-Strike rejimi seçilir...';
+
+          // Step 5b: Select "Counter-Strike" in the Games panel before feeding the ZIP
+          var menuItems = document.querySelectorAll('.menu-item');
+          for (var m = 0; m < menuItems.length; m++) {
+            if (menuItems[m].textContent.trim() === 'Counter-Strike') {
+              menuItems[m].click();
+              break;
+            }
+          }
+          // Give Vue reactivity time to update
+          await new Promise(function(r) { setTimeout(r, 500); });
+
           progFill.style.width = '96%';
           statusEl.textContent = 'Oyun mühərrikə ötürülür...';
 
@@ -165,7 +179,7 @@
           fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 
           progFill.style.width = '100%';
-          statusEl.textContent = 'Oyun başladılır! Bir neçə saniyə gözləyin...';
+          statusEl.textContent = 'Counter-Strike 1.6 başladılır! Bir neçə saniyə gözləyin...';
 
           // Step 7: Hide loader after engine takes over
           setTimeout(function() {
