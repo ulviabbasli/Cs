@@ -152,53 +152,16 @@
           }
 
           progFill.style.width = '94%';
-          statusEl.textContent = 'Counter-Strike rejimi seçilir...';
+          statusEl.textContent = 'Counter-Strike rejimi hazırlanır...';
 
-          // Step 5b: Select "Counter-Strike" in the Games panel
-          // Use proper MouseEvent for Vue event handling
-          var menuItems = document.querySelectorAll('.menu-item');
-          var csClicked = false;
-          for (var m = 0; m < menuItems.length; m++) {
-            var txt = menuItems[m].textContent.trim();
-            if (txt === 'Counter-Strike') {
-              // Use full MouseEvent for Vue compatibility
-              menuItems[m].dispatchEvent(new MouseEvent('click', {
-                bubbles: true, cancelable: true, view: window
-              }));
-              csClicked = true;
-              break;
-            }
-          }
+          // Set scriptDir for CS (ensures engine looks in cs/ directory)
+          window.scriptDir = 'cs/';
 
-          // Step 5c: Also set launch options to "-game cstrike" as fallback
-          // Vue v-model needs 'input' event to detect changes
-          var launchInput = document.querySelector('.xash-launch-options');
-          if (launchInput) {
-            // Set native value and trigger Vue v-model update
-            var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-              window.HTMLInputElement.prototype, 'value'
-            ).set;
-            nativeInputValueSetter.call(launchInput, '-game cstrike +_vgui_menus 0');
-            launchInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-
-          // Give Vue reactivity time to process both changes
-          await new Promise(function(r) { setTimeout(r, 800); });
-
-          // Verify Counter-Strike is selected
-          var selectedItems = document.querySelectorAll('.menu-item--selected');
-          var csSelected = false;
-          for (var s = 0; s < selectedItems.length; s++) {
-            if (selectedItems[s].textContent.trim() === 'Counter-Strike') {
-              csSelected = true;
-              break;
-            }
-          }
-          statusEl.textContent = csSelected 
-            ? 'CS rejimi seçildi! Oyun ötürülür...' 
-            : 'CS rejimi Launch Options ilə təyin edildi. Oyun ötürülür...';
+          // Brief pause for Vue app to fully stabilize
+          await new Promise(function(r) { setTimeout(r, 500); });
 
           progFill.style.width = '96%';
+          statusEl.textContent = 'Oyun mühərrikə ötürülür...';
 
           // Step 6: Create File object and trigger the Open ZIP handler
           var blob = new Blob([merged], { type: 'application/zip' });
