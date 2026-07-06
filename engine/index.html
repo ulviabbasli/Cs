@@ -4,8 +4,7 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/Cs/engine/assets/hl-bright-BcANNclR.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>WebXash - CS 1.6</title>
-    <!-- NOTE: Vue app script is NOT loaded here. It will be loaded dynamically after game files are ready. -->
+    <title>CS 1.6 - WebXash</title>
     <link rel="stylesheet" crossorigin href="/Cs/engine/assets/index-b_7h_EiO.css">
     <style>
       body, html { margin: 0; padding: 0; background: #0a0a0a; overflow: hidden; }
@@ -67,7 +66,6 @@
     </div>
 
     <script>
-      // This runs immediately, before any module scripts
       window._startGame = async function() {
         var btn = document.getElementById('startBtn');
         var progContainer = document.getElementById('progressContainer');
@@ -78,95 +76,66 @@
         btn.disabled = true;
         btn.textContent = 'Yüklənir...';
         progContainer.style.display = 'block';
-        statusEl.textContent = 'Oyun faylları axtarılır...';
         errorEl.textContent = '';
 
         try {
-          // Step 1: Discover how many parts exist
-          var partsCount = 0;
-          for (var i = 1; i <= 30; i++) {
-            try {
-              var check = await fetch('/Cs/engine/cs/game_part_' + i + '.bin', { method: 'HEAD' });
-              if (check.ok) {
-                partsCount = i;
-              } else {
-                break;
-              }
-            } catch(e) {
-              break;
-            }
+          // Step 1: Download the single game ZIP (15MB)
+          statusEl.textContent = 'CS 1.6 oyun faylları yüklənir (15 MB)...';
+          progFill.style.width = '10%';
+
+          var response = await fetch('/Cs/engine/cs/cstrike_game.zip');
+          if (!response.ok) throw new Error('Oyun faylları yüklənə bilmədi (HTTP ' + response.status + ')');
+          
+          var reader = response.body.getReader();
+          var contentLength = +response.headers.get('Content-Length') || 15000000;
+          var receivedLength = 0;
+          var chunks = [];
+          
+          while (true) {
+            var result = await reader.read();
+            if (result.done) break;
+            chunks.push(result.value);
+            receivedLength += result.value.length;
+            var pct = Math.round((receivedLength / contentLength) * 70) + 10;
+            progFill.style.width = pct + '%';
+            statusEl.textContent = 'Yüklənir: ' + Math.round(receivedLength / 1048576) + ' / ' + Math.round(contentLength / 1048576) + ' MB';
           }
 
-          if (partsCount === 0) {
-            throw new Error('Oyun faylları tapılmadı! (game_part_*.bin mövcud deyil)');
-          }
+          // Combine chunks
+          var zipData = new Uint8Array(receivedLength);
+          var pos = 0;
+          for (var c of chunks) { zipData.set(c, pos); pos += c.length; }
+          chunks = null;
 
-          statusEl.textContent = partsCount + ' hissə tapıldı. Yüklənir...';
-
-          // Step 2: Download all parts
-          var buffers = [];
-          var totalBytes = 0;
-          for (var i = 1; i <= partsCount; i++) {
-            statusEl.textContent = 'Hissə ' + i + '/' + partsCount + ' yüklənir...';
-            progFill.style.width = Math.round(((i - 1) / partsCount) * 85) + '%';
-
-            var res = await fetch('/Cs/engine/cs/game_part_' + i + '.bin');
-            if (!res.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi (HTTP ' + res.status + ')');
-            var buf = await res.arrayBuffer();
-            buffers.push(new Uint8Array(buf));
-            totalBytes += buf.byteLength;
-          }
-
-          progFill.style.width = '88%';
-          statusEl.textContent = 'Hissələr birləşdirilir (' + Math.round(totalBytes / 1048576) + ' MB)...';
-
-          // Step 3: Merge all parts into one ZIP
-          var merged = new Uint8Array(totalBytes);
-          var offset = 0;
-          for (var j = 0; j < buffers.length; j++) {
-            merged.set(buffers[j], offset);
-            offset += buffers[j].length;
-          }
-          buffers = null; // Free memory
-
-          progFill.style.width = '92%';
+          progFill.style.width = '82%';
           statusEl.textContent = 'WebXash mühərriki yüklənir...';
 
-          // Step 4: Load the Vue/WebXash app dynamically
+          // Step 2: Set scriptDir for CS mode
+          window.scriptDir = 'cs/';
+
+          // Step 3: Load Vue/WebXash app
           var script = document.createElement('script');
           script.type = 'module';
           script.crossOrigin = '';
           script.src = '/Cs/engine/assets/index-qQhwzMp6.js';
           document.head.appendChild(script);
 
-          // Step 5: Wait for Vue app to mount and the file input to appear
+          // Step 4: Wait for Vue app and file input
           var fileInput = null;
           for (var attempt = 0; attempt < 60; attempt++) {
             await new Promise(function(r) { setTimeout(r, 300); });
             fileInput = document.querySelector('input[type="file"][accept=".zip"]');
             if (fileInput) break;
           }
+          if (!fileInput) throw new Error('Mühərrik yüklənə bilmədi!');
 
-          if (!fileInput) {
-            throw new Error('Mühərrik yükləndi amma fayl girişi tapılmadı!');
-          }
-
-          progFill.style.width = '94%';
-          statusEl.textContent = 'Counter-Strike rejimi hazırlanır...';
-
-          // Set scriptDir for CS (ensures engine looks in cs/ directory)
-          window.scriptDir = 'cs/';
-
-          // Brief pause for Vue app to fully stabilize
-          await new Promise(function(r) { setTimeout(r, 500); });
-
-          progFill.style.width = '96%';
+          progFill.style.width = '90%';
           statusEl.textContent = 'Oyun mühərrikə ötürülür...';
 
-          // Step 6: Create File object and trigger the Open ZIP handler
-          var blob = new Blob([merged], { type: 'application/zip' });
-          merged = null; // Free memory
-          var file = new File([blob], 'cstrike.zip', { type: 'application/zip' });
+          // Step 5: Feed ZIP to the Open ZIP handler
+          var blob = new Blob([zipData], { type: 'application/zip' });
+          zipData = null;
+          var file = new File([blob], 'cstrike_game.zip', { type: 'application/zip' });
 
           var dt = new DataTransfer();
           dt.items.add(file);
@@ -174,9 +143,8 @@
           fileInput.dispatchEvent(new Event('change', { bubbles: true }));
 
           progFill.style.width = '100%';
-          statusEl.textContent = 'Counter-Strike 1.6 başladılır! Bir neçə saniyə gözləyin...';
+          statusEl.textContent = 'Counter-Strike 1.6 başladılır...';
 
-          // Step 7: Hide loader after engine takes over
           setTimeout(function() {
             document.getElementById('loader-screen').style.display = 'none';
           }, 5000);
