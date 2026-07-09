@@ -66,6 +66,12 @@
     </div>
 
     <script>
+      // Get multiplayer IP from URL parameter if present
+      var urlParams = new URLSearchParams(window.location.search);
+      var ipParam = urlParams.get('ip');
+      if (ipParam) {
+        window.multiplayerIP = ipParam;
+      }
 
       window._startGame = async function() {
         var btn = document.getElementById('startBtn');
