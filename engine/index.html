@@ -79,35 +79,33 @@
         errorEl.textContent = '';
 
         try {
-          // Step 1: Download the single game ZIP (15MB)
-          statusEl.textContent = 'CS 1.6 oyun faylları yüklənir (15 MB)...';
-          progFill.style.width = '10%';
+          // Step 1: Download all parts of the game ZIP
+          var partsCount = 3;
+          var buffers = [];
+          var totalBytes = 0;
+          
+          for (var i = 1; i <= partsCount; i++) {
+            statusEl.textContent = 'Oyun faylları yüklənir: Hissə ' + i + ' / ' + partsCount + '...';
+            progFill.style.width = Math.round(((i - 1) / partsCount) * 70) + 10 + '%';
 
-          var response = await fetch('/Cs/engine/cs/cstrike_game.zip');
-          if (!response.ok) throw new Error('Oyun faylları yüklənə bilmədi (HTTP ' + response.status + ')');
-          
-          var reader = response.body.getReader();
-          var contentLength = +response.headers.get('Content-Length') || 15000000;
-          var receivedLength = 0;
-          var chunks = [];
-          
-          while (true) {
-            var result = await reader.read();
-            if (result.done) break;
-            chunks.push(result.value);
-            receivedLength += result.value.length;
-            var pct = Math.round((receivedLength / contentLength) * 70) + 10;
-            progFill.style.width = pct + '%';
-            statusEl.textContent = 'Yüklənir: ' + Math.round(receivedLength / 1048576) + ' / ' + Math.round(contentLength / 1048576) + ' MB';
+            var response = await fetch('/Cs/engine/cs/cstrike_game.part_' + i);
+            if (!response.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi (HTTP ' + response.status + ')');
+            
+            var buf = await response.arrayBuffer();
+            buffers.push(new Uint8Array(buf));
+            totalBytes += buf.byteLength;
           }
 
-          // Combine chunks
-          var zipData = new Uint8Array(receivedLength);
-          var pos = 0;
-          for (var c of chunks) { zipData.set(c, pos); pos += c.length; }
-          chunks = null;
-
           progFill.style.width = '82%';
+          statusEl.textContent = 'Fayllar birləşdirilir...';
+
+          // Combine chunks
+          var zipData = new Uint8Array(totalBytes);
+          var pos = 0;
+          for (var c of buffers) { zipData.set(c, pos); pos += c.length; }
+          buffers = null;
+
+          progFill.style.width = '88%';
           statusEl.textContent = 'WebXash mühərriki yüklənir...';
 
           // Step 2: Set scriptDir for CS mode
@@ -129,7 +127,7 @@
           }
           if (!fileInput) throw new Error('Mühərrik yüklənə bilmədi!');
 
-          progFill.style.width = '90%';
+          progFill.style.width = '94%';
           statusEl.textContent = 'Oyun mühərrikə ötürülür...';
 
           // Step 5: Feed ZIP to the Open ZIP handler
