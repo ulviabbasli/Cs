@@ -220,12 +220,15 @@ git push -u origin main</code></pre>
                     <div class="step-item">
                         <div class="step-num">1</div>
                         <div class="step-details">
-                            <h3>Docker ilə Serverin Qurulması (Ən Sadə Metod)</h3>
-                            <p>Kompyuterində Docker proqramı olan bir iş yoldaşınız terminalda (CMD və ya PowerShell) bu komandanı işə salmalıdır:</p>
+                            <h3>Lokal Serverin Qurulması (İki Üsuldan Birini Seçin)</h3>
+                            <p><strong>Üsul A: Heç bir proqram yükləmədən (Yalnız Windows PowerShell ilə - TÖVSİYƏ OLUNUR):</strong></p>
+                            <ol style="margin-left: 20px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
+                                <li>Ofisdə server olacaq Windows kompyuterdə layihə qovluğuna daxil olun.</li>
+                                <li><strong><code>run_local_server.ps1</code></strong> faylının üzərinə sağ klikləyin və <strong>"Run with PowerShell"</strong> (PowerShell ilə işlət) seçin.</li>
+                                <li>Bu skript avtomatik olaraq Dedicated Serveri arxa planda işə salacaq və brauzerlərin qoşulması üçün WebSocket proxy-ni aktivləşdirəcək.</li>
+                            </ol>
+                            <p><strong>Üsul B: Əgər kompyuterdə Docker varsa:</strong></p>
                             <pre><code>docker run -d -p 27015:27015/udp -p 27016:27016 yohimik/cs-web-server</code></pre>
-                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">
-                                Bu komanda həm rəsmi CS 1.6 serverini (UDP 27015), həm də brauzerlərin qoşulması üçün WebSocket proxy-ni (TCP 27016) işə salır.
-                            </p>
                         </div>
                     </div>
                     <div class="step-item">
