@@ -47,13 +47,6 @@
       }
       .status-text { color: #aaa; font-size: 13px; margin-top: 10px; text-align: center; }
       .error-text { color: #ff4444; font-size: 13px; margin-top: 8px; text-align: center; }
-      #debug-console {
-        display: none; position: fixed; bottom: 10px; left: 10px; right: 10px; height: 180px;
-        background: rgba(0,0,0,0.85); border: 1px solid #39ff14;
-        font-family: monospace; font-size: 11px; color: #00ff00;
-        overflow-y: scroll; padding: 10px; z-index: 99999999;
-        box-sizing: border-box; border-radius: 6px;
-      }
     </style>
   </head>
   <body>
@@ -72,41 +65,7 @@
       </div>
     </div>
 
-    <div id="debug-console"></div>
-
     <script>
-      // Setup debug logger to display all engine stdout/stderr console logs on the screen
-      var debugConsole = document.getElementById('debug-console');
-      function logToScreen(msg, isError) {
-        debugConsole.style.display = 'block';
-        var line = document.createElement('div');
-        if (isError) {
-          line.style.color = '#ff4444';
-          line.textContent = '[ERROR] ' + msg;
-        } else {
-          line.textContent = '[LOG] ' + msg;
-        }
-        debugConsole.appendChild(line);
-        debugConsole.scrollTop = debugConsole.scrollHeight;
-      }
-
-      var oldLog = console.log;
-      console.log = function() {
-        var args = Array.prototype.slice.call(arguments);
-        logToScreen(args.join(' '), false);
-        oldLog.apply(console, arguments);
-      };
-
-      var oldError = console.error;
-      console.error = function() {
-        var args = Array.prototype.slice.call(arguments);
-        logToScreen(args.join(' '), true);
-        oldError.apply(console, arguments);
-      };
-
-      window.addEventListener('error', function(e) {
-        logToScreen(e.message + ' at ' + e.filename + ':' + e.lineno, true);
-      });
 
       window._startGame = async function() {
         var btn = document.getElementById('startBtn');
