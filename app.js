@@ -135,5 +135,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }, 2000);
     });
 
+    // ----------------------------------------------------
+    // 3. MULTIPLAYER SETTINGS LOGIC (WASM)
+    // ----------------------------------------------------
+    const btnStartMultiplayer = document.getElementById('btn-start-multiplayer');
+    const multiplayerIpInput = document.getElementById('multiplayer-ip-input');
+    const gameIframe = document.getElementById('game-iframe');
+    const gameIframeTitle = document.getElementById('game-iframe-title');
+    const gameOpenTab = document.getElementById('game-open-tab');
+
+    btnStartMultiplayer.addEventListener('click', () => {
+        const ip = multiplayerIpInput.value.trim();
+        if (!ip) {
+            alert('Zəhmət olmasa, server IP adresini daxil edin.');
+            return;
+        }
+
+        const iframeUrl = `./engine/index.html?ip=${encodeURIComponent(ip)}`;
+        
+        // Load in iframe
+        gameIframe.src = iframeUrl;
+        
+        // Update header info
+        gameIframeTitle.textContent = `WebXash3D Mühərriki - Çoxnəfərli Oyun (Multiplayer Server: ${ip})`;
+        gameIframeTitle.style.color = '#39ff14';
+        
+        // Update new tab link
+        gameOpenTab.href = iframeUrl;
+
+        alert(`Oyun ${ip} serverinə bağlanmaq üçün hazırlanır. Başlat düyməsini sıxın!`);
+    });
 
 });
