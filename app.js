@@ -31,9 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     const btnStartMultiplayer = document.getElementById('btn-start-multiplayer');
     const multiplayerIpInput = document.getElementById('multiplayer-ip-input');
-    const gameIframe = document.getElementById('game-iframe');
-    const gameIframeTitle = document.getElementById('game-iframe-title');
-    const gameOpenTab = document.getElementById('game-open-tab');
 
     btnStartMultiplayer.addEventListener('click', () => {
         let ip = multiplayerIpInput.value.trim();
@@ -46,19 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
         ip = ip.replace(/^(https?:\/\/|wss?:\/\/)/i, '');
         ip = ip.replace(/\/+$/, '');
 
-        const iframeUrl = `./engine/index.html?ip=${encodeURIComponent(ip)}`;
+        const gameUrl = `./engine/index.html?ip=${encodeURIComponent(ip)}`;
         
-        // Load in iframe
-        gameIframe.src = iframeUrl;
-        
-        // Update header info
-        gameIframeTitle.textContent = `WebXash3D Mühərriki - Çoxnəfərli Oyun (Multiplayer Server: ${ip})`;
-        gameIframeTitle.style.color = '#39ff14';
-        
-        // Update new tab link
-        gameOpenTab.href = iframeUrl;
-
-        alert(`Oyun ${ip} serverinə bağlanmaq üçün hazırlanır. Başlat düyməsini sıxın!`);
+        // Open in new tab
+        window.open(gameUrl, '_blank');
     });
 
 });
