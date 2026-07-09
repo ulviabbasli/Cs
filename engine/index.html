@@ -95,7 +95,7 @@
             statusEl.textContent = 'Oyun faylları yüklənir: Hissə ' + i + ' / ' + partsCount + '...';
             progFill.style.width = Math.round(((i - 1) / partsCount) * 70) + 10 + '%';
 
-            var response = await fetch('/Cs/engine/cs/cstrike_game.part_' + i);
+            var response = await fetch('cs/cstrike_game.part_' + i);
             if (!response.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi (HTTP ' + response.status + ')');
             
             var buf = await response.arrayBuffer();
@@ -122,7 +122,7 @@
           var script = document.createElement('script');
           script.type = 'module';
           script.crossOrigin = '';
-          script.src = '/Cs/engine/assets/index-qQhwzMp6.js';
+          script.src = './assets/index-qQhwzMp6.js';
           document.head.appendChild(script);
 
           // Step 4: Wait for Vue app and file input
