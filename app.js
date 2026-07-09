@@ -36,11 +36,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const gameOpenTab = document.getElementById('game-open-tab');
 
     btnStartMultiplayer.addEventListener('click', () => {
-        const ip = multiplayerIpInput.value.trim();
+        let ip = multiplayerIpInput.value.trim();
         if (!ip) {
             alert('Zəhmət olmasa, server IP adresini daxil edin.');
             return;
         }
+
+        // Clean up IP input: strip protocols and trailing slashes
+        ip = ip.replace(/^(https?:\/\/|wss?:\/\/)/i, '');
+        ip = ip.replace(/\/+$/, '');
 
         const iframeUrl = `./engine/index.html?ip=${encodeURIComponent(ip)}`;
         
