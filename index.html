@@ -18,9 +18,8 @@
     <header>
         <div class="container header-container">
             <div class="logo-area">
-                <span class="badge">TACTICAL BRACKET</span>
+                <span class="badge">Segment Strike</span>
                 <h1 id="main-title">CS 1.6 <span class="highlight">WEB HUB</span></h1>
-                <p class="subtitle">İş yoldaşları ilə heç bir quraşdırma olmadan, brauzerdə oyna</p>
             </div>
             <div class="radar-container">
                 <div class="radar">
@@ -46,40 +45,40 @@
         <!-- Tab 2: Self-Host Browser Client (WASM) -->
         <section id="self-host-tab" class="tab-content active">
             <div class="card glass">
-                <h2><span class="icon">👾</span> WebXash3D CS 1.6 Client (Brauzerdə Birbaşa)</h2>
-                <p>Bu bölmədə rəsmi WebGL/WebAssembly əsaslı CS 1.6 klienti yerləşdirilib. Oyun sizin brauzerinizdə, tamamilə lokal olaraq işə düşür.</p>
-                
-                <div class="client-alert warning-alert" style="margin-bottom: 20px;">
-                    <strong>Avtomatik Yükləmə:</strong> Layihəyə <code>game_part_*.bin</code> faylları yüklənibsə, aşağıdakı emulyatordan <strong>Counter-Strike 1.6</strong> seçib <strong>Start Demo</strong> kliklədiyinizdə oyun avtomatik olaraq heç bir fayl yükləmədən başlayacaq!
-                </div>
-
-                <!-- Multiplayer Config UI -->
-                <div class="multiplayer-box" style="margin-bottom: 20px; padding: 20px; background: rgba(0, 0, 0, 0.4); border: 1px solid #39ff14; border-radius: 8px; box-shadow: 0 0 15px rgba(57, 255, 20, 0.1);">
-                    <h3 style="font-family: Orbitron, sans-serif; color: #39ff14; margin-bottom: 10px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
-                        <span>🌐</span> İş Yoldaşları ilə Çoxnəfərli (Multiplayer) Oyun
-                    </h3>
-                    <p style="font-size: 0.85rem; color: #888; margin-bottom: 15px; line-height: 1.4;">
-                        Birlikdə oynamaq üçün komandanızdan bir nəfər lokal şəbəkədə (ofisdə) və ya internetdə CS Dedicated Server qurmalıdır.
-                        Digər oyunçular həmin serverin WebSocket IP adresini daxil edib oyuna daxil ola bilərlər.
-                    </p>
-                    <div style="display: flex; gap: 10px; max-width: 500px;">
-                        <input type="text" id="multiplayer-ip-input" placeholder="Məsələn: 192.168.1.50:27016" style="flex: 1; padding: 10px 14px; background: rgba(0,0,0,0.8); border: 1px solid #333; color: #fff; border-radius: 6px; font-family: monospace;">
-                        <button id="btn-start-multiplayer" class="btn primary-btn" style="padding: 10px 24px; font-weight: bold;">
-                            Qoşul və Başlat
-                        </button>
+                <div class="grid-2-col" style="margin-top: 10px;">
+                    <!-- Card A: Çoxnəfərli Oyun -->
+                    <div class="multiplayer-box" style="padding: 24px; background: rgba(0, 0, 0, 0.4); border: 1px solid #39ff14; border-radius: 12px; box-shadow: 0 0 15px rgba(57, 255, 20, 0.1); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3 style="font-family: Orbitron, sans-serif; color: #39ff14; margin-bottom: 12px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                                <span>🌐</span> Çoxnəfərli Oyun (Multiplayer)
+                            </h3>
+                            <p style="font-size: 0.85rem; color: #aaa; line-height: 1.4; margin-bottom: 20px;">
+                                Server IP adresini daxil edərək iş yoldaşlarınızla eyni oyuna qoşulun. (Server qurulması üçün TƏLİMATLAR bölməsinə baxın).
+                            </p>
+                        </div>
+                        <div>
+                            <input type="text" id="multiplayer-ip-input" placeholder="Məsələn: server.app.github.dev" style="width: 100%; padding: 12px 16px; background: rgba(0,0,0,0.8); border: 1px solid #333; color: #fff; border-radius: 6px; font-family: monospace; margin-bottom: 12px; box-sizing: border-box;">
+                            <button id="btn-start-multiplayer" class="btn primary-btn" style="width: 100%; padding: 12px; font-weight: bold; border-radius: 6px;">
+                                Qoşul və Başlat ➔
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <div class="game-container-wrapper">
-                    <div class="game-header-bar">
-                        <span id="game-iframe-title">WebXash3D Mühərriki - Sizin Brauzer Klientiniz (Tək Nəfərlik / Singleplayer)</span>
-                        <a href="./engine/index.html" id="game-open-tab" target="_blank" class="btn small-btn" style="text-decoration: none;">Yeni Pəncərədə Aç ➔</a>
-                    </div>
-                    <div class="iframe-container" style="width: 100%; height: 600px; background-color: #000; position: relative;">
-                        <iframe id="game-iframe" src="./engine/index.html" 
-                                allow="autoplay; fullscreen; pointer-lock; microphone" 
-                                style="width: 100%; height: 100%; border: none;">
-                        </iframe>
+                    <!-- Card B: Tək Nəfərlik Oyun -->
+                    <div class="singleplayer-box" style="padding: 24px; background: rgba(0, 0, 0, 0.4); border: 1px solid #ff9800; border-radius: 12px; box-shadow: 0 0 15px rgba(255, 152, 0, 0.1); display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <h3 style="font-family: Orbitron, sans-serif; color: #ff9800; margin-bottom: 12px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                                <span>🤖</span> Tək Nəfərlik Oyun (Singleplayer)
+                            </h3>
+                            <p style="font-size: 0.85rem; color: #aaa; line-height: 1.4; margin-bottom: 20px;">
+                                Botlarla birlikdə tək nəfərlik rejimdə Counter-Strike 1.6 oynayın.
+                            </p>
+                        </div>
+                        <div>
+                            <a href="./engine/index.html" target="_blank" class="btn secondary-btn" style="display: block; width: 100%; padding: 12px; font-weight: bold; border-radius: 6px; text-decoration: none; text-align: center; border-color: #ff9800; color: #ff9800; box-sizing: border-box;">
+                                Oyunu Başlat ➔
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -88,89 +87,48 @@
         <!-- Tab 3: Instructions & GitHub Deployment -->
         <section id="instructions-tab" class="tab-content">
             <div class="card glass">
-                <h2><span class="icon">🚀</span> GitHub Pages Yayım Təlimatı</h2>
-                <p>Bu portalı öz GitHub səhifənizdə yayımlamaq və iş yoldaşlarınızla paylaşmaq üçün aşağıdakı addımları izləyin.</p>
+                <h2><span class="icon">🖥️</span> İş Kompyuteri üçün Çoxnəfərli Oyun Serverinin Qurulması</h2>
+                <p>İş kompyuterlərində admin icazələri olmadan və kart məlumatı daxil etmədən, tamamilə pulsuz və 24/7 işləyən çoxnəfərli oyun serverini (GitHub Codespaces ilə) necə qurmaq olar:</p>
 
-                <div class="steps-timeline">
+                <div class="steps-timeline" style="margin-top: 20px;">
                     <div class="step-item">
                         <div class="step-num">1</div>
                         <div class="step-details">
-                            <h3>GitHub-da Yeni Anbar (Repository) Yaradın</h3>
-                            <p>GitHub profilinizdə (<a href="https://github.com/ulviabbasli" target="_blank">ulviabbasli</a>) daxil olun və <strong>Cs</strong> adında yeni public (ictimai) bir anbar yaradın.</p>
+                            <h3>GitHub-da Codespace Yaradın</h3>
+                            <p>Öz layihənizə (<a href="https://github.com/ulviabbasli/Cs" target="_blank">github.com/ulviabbasli/Cs</a>) daxil olun, yaşıl <strong>"<> Code"</strong> düyməsinə klikləyin, <strong>Codespaces</strong> tabına keçin və <strong>"Create codespace on main"</strong> düyməsini sıxın.</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-num">2</div>
                         <div class="step-details">
-                            <h3>Faylları GitHub-a Yükləyin</h3>
-                            <p><strong>Metod A: Brauzer vasitəsilə (Heç bir proqram yükləmədən - Ən sadə):</strong></p>
-                            <ol style="margin-left: 20px; color: var(--text-muted); font-size: 0.9rem;">
-                                <li>GitHub-da yaratdığınız <code>Cs</code> anbarına (repository) daxil olun.</li>
-                                <li><strong>"uploading an existing file"</strong> və ya <strong>"Add file" ➔ "Upload files"</strong> düyməsini klikləyin.</li>
-                                <li>Lokalda olan <code>index.html</code>, <code>style.css</code>, <code>app.js</code> və <code>README.md</code> fayllarını sürükləyib brauzerə buraxın.</li>
-                                <li>Səhifənin aşağısında <strong>"Commit changes"</strong> düyməsini sıxın.</li>
-                            </ol>
-                            <br>
-                            <p><strong>Metod B: Git Komandaları ilə (Əgər kompyuterdə Git varsa):</strong></p>
-                            <pre><code>git init
-git add .
-git commit -m "First commit: CS 1.6 Web Hub"
-git branch -M main
-git remote add origin https://github.com/ulviabbasli/Cs.git
-git push -u origin main</code></pre>
+                            <h3>Server Komandasını İşə Salın</h3>
+                            <p>Açılan virtual mühitdə, ekranın aşağısındakı terminala bu komandanı yapışdırıb <strong>Enter</strong> sıxın:</p>
+                            <pre><code>docker run -d -p 27015:27015/udp -p 27016:27016 yohimik/cs-web-server</code></pre>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-num">3</div>
                         <div class="step-details">
-                            <h3>GitHub Pages-i Aktivləşdirin</h3>
-                            <p>GitHub anbarınızın (Repository) <strong>Settings</strong> ➔ <strong>Pages</strong> bölməsinə daxil olun. <strong>Build and deployment</strong> hissəsində <strong>Branch</strong> seçimini <code>main</code> (və qovluğu <code>/ (root)</code>) olaraq təyin edib <strong>Save</strong> düyməsini sıxın.</p>
+                            <h3>Port Görünüşünü Aktivləşdirin</h3>
+                            <p>Aşağı paneldə <strong>"Ports"</strong> (Portlar) tabına keçin, siyahıdakı <strong>27016</strong> portunun üzərinə sağ klikləyin, <strong>"Port Visibility" ➔ "Public"</strong> (İctimai) edin.</p>
                         </div>
                     </div>
                     <div class="step-item">
                         <div class="step-num">4</div>
                         <div class="step-details">
-                            <h3>Paylaşın və Oynayın!</h3>
-                            <p>Bir neçə dəqiqə ərzində saytınız aktivləşəcək. İş yoldaşlarınız <strong><code>https://ulviabbasli.github.io/Cs/</code></strong> linkinə daxil olaraq bu portalı aça biləcəklər!</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card glass margin-top-20">
-                <h2><span class="icon">🖥️</span> İş Yoldaşları ilə Oyun Qurmaq (Lokal Server Setup)</h2>
-                <p>Əgər oyunçular eyni ofis şəbəkəsindədirsə (LAN), bir nəfər öz kompyuterində asanlıqla Counter-Strike Dedicated Server qura bilər və hamı eyni oyuna qoşula bilər:</p>
-                <div class="steps-timeline" style="margin-top: 15px;">
-                    <div class="step-item">
-                        <div class="step-num">1</div>
-                        <div class="step-details">
-                            <h3>Lokal Serverin Qurulması (İki Üsuldan Birini Seçin)</h3>
-                            <p><strong>Üsul A: Heç bir proqram yükləmədən (Yalnız Windows PowerShell ilə - TÖVSİYƏ OLUNUR):</strong></p>
-                            <ol style="margin-left: 20px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5; margin-bottom: 15px;">
-                                <li>Ofisdə server olacaq Windows kompyuterdə layihə qovluğuna daxil olun.</li>
-                                <li><strong><code>run_local_server.ps1</code></strong> faylının üzərinə sağ klikləyin və <strong>"Run with PowerShell"</strong> (PowerShell ilə işlət) seçin.</li>
-                                <li>Bu skript avtomatik olaraq Dedicated Serveri arxa planda işə salacaq və brauzerlərin qoşulması üçün WebSocket proxy-ni aktivləşdirəcək.</li>
+                            <h3>IP-ni Kopyalayın və İcazə Verin (MƏCBURİ)</h3>
+                            <ol style="margin-left: 20px; color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                                <li>Portun qarşısındakı <strong>"Forwarded Address"</strong> linkini kopyalayın (məsələn, <code>https://...-27016.app.github.dev/</code>).</li>
+                                <li>Həmin linki brauzerinizdə <strong>yeni tabda açın</strong> və çıxan xəbərdarlıq səhifəsində yaşıl <strong>"Continue"</strong> düyməsini klikləyin.</li>
+                                <li>Linkdən <code>https://</code> və sondakı maili xətt (/) işarələrini silərək təmiz server ünvanını əldə edin.</li>
                             </ol>
-                            <p><strong>Üsul B: Əgər kompyuterdə Docker varsa:</strong></p>
-                            <pre><code>docker run -d -p 27015:27015/udp -p 27016:27016 yohimik/cs-web-server</code></pre>
                         </div>
                     </div>
                     <div class="step-item">
-                        <div class="step-num">2</div>
+                        <div class="step-num">5</div>
                         <div class="step-details">
-                            <h3>Server IP Ünvanının Tapılması</h3>
-                            <p>Serveri quran şəxs öz kompyuterinin lokal IP ünvanını tapmalıdır (PowerShell-də <code>ipconfig</code> komandası ilə, məsələn: <code>192.168.1.50</code>).</p>
-                        </div>
-                    </div>
-                    <div class="step-item">
-                        <div class="step-num">3</div>
-                        <div class="step-details">
-                            <h3>Oyuna Qoşulma</h3>
-                            <p>Bütün iş yoldaşlarınız <strong>"BRAWSER KLİENT (WASM)"</strong> bölməsinə daxil olaraq IP sahəsinə server IP-sini və 27016 portunu daxil etməlidir:</p>
-                            <p style="font-family: monospace; background: #000; padding: 6px 12px; border-radius: 4px; display: inline-block; color: #39ff14; font-size: 0.9rem;">
-                                192.168.1.50:27016
-                            </p>
-                            <p style="margin-top: 8px;"><strong>"Qoşul və Başlat"</strong> düyməsini kliklədikdən sonra oyuna daxil olun. Oyun başladıqdan sonra <strong>MULTIPLAYER ➔ LAN Games</strong> bölməsində qurulmuş serveri görəcəksiniz!</p>
+                            <h3>Qoşulun və Oynayın!</h3>
+                            <p>Təmizlənmiş server ünvanını (məsələn: <code>...-27016.app.github.dev</code>) IP qutusuna yazın, <strong>"Qoşul və Başlat"</strong> klikləyin və oyun açılan kimi avtomatik serverə bağlanın!</p>
                         </div>
                     </div>
                 </div>
@@ -184,12 +142,8 @@ git push -u origin main</code></pre>
                         <p>Brauzer oyunlarında tam siçan nəzarəti üçün Pointer Lock aktiv olmalıdır. Oyuna başladıqdan sonra ekrana klikləyin və brauzerin siçanı kilidləməsinə icazə verin. Oyundan çıxmaq üçün <strong>ESC</strong> düyməsini sıxın.</p>
                     </details>
                     <details class="faq-item">
-                        <summary>Maksimum neçə nəfər oynaya bilərik?</summary>
-                        <p>Play-CS.com otaqları adətən 32 nəfərə qədər oyunçunu dəstəkləyir. Lokal ofis şəbəkənizdə limitsiz şəkildə komandalara bölünüb oynaya bilərsiniz.</p>
-                    </details>
-                    <details class="faq-item">
                         <summary>Səs və mikrofon dəstəklənirmi?</summary>
-                        <p>Bəli! Brauzerdə mikrofon icazəsi verdikdən sonra oyundaxili səsli söhbət (voice chat) dəstəklənən otaqlarda işləyəcək.</p>
+                        <p>Bəli! Brauzerdə mikrofon icazəsi verdikdən sonra oyundaxili səsli söhbət (voice chat) serverde işləyəcək.</p>
                     </details>
                 </div>
             </div>
