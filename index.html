@@ -35,10 +35,7 @@
     <main class="container">
         <!-- Dashboard Navigation -->
         <nav class="tab-nav">
-            <button class="tab-btn active" data-tab="lobby-generator-tab" id="nav-lobby">
-                <span class="icon">🎮</span> HƏZRƏT LOBBY (PLAY-CS)
-            </button>
-            <button class="tab-btn" data-tab="self-host-tab" id="nav-self-host">
+            <button class="tab-btn active" data-tab="self-host-tab" id="nav-self-host">
                 <span class="icon">💻</span> BRAWSER KLİENT (WASM)
             </button>
             <button class="tab-btn" data-tab="instructions-tab" id="nav-instructions">
@@ -46,81 +43,8 @@
             </button>
         </nav>
 
-        <!-- Tab 1: Lobby Generator -->
-        <section id="lobby-generator-tab" class="tab-content active">
-            <div class="grid-2-col">
-                <div class="card glass">
-                    <h2><span class="icon">⚡</span> Tez Otaq Yarat</h2>
-                    <p class="card-desc">İş yoldaşlarınla birlikdə oynamaq üçün aşağıdakı məlumatları doldur və otaq linki yarat.</p>
-                    
-                    <form id="lobby-form" onsubmit="event.preventDefault();">
-                        <div class="form-group">
-                            <label for="nickname">Sənin Ləqəbin (Nick):</label>
-                            <input type="text" id="nickname" placeholder="Oyunçu adı daxil et..." required value="Player">
-                        </div>
-
-                        <div class="form-group">
-                            <label>Xəritə Seç:</label>
-                            <div class="map-grid">
-                                <label class="map-card selected" id="map-dust2">
-                                    <input type="radio" name="selected-map" value="de_dust2" checked hidden>
-                                    <div class="map-img-placeholder dust2"></div>
-                                    <span>de_dust2</span>
-                                </label>
-                                <label class="map-card" id="map-inferno">
-                                    <input type="radio" name="selected-map" value="de_inferno" hidden>
-                                    <div class="map-img-placeholder inferno"></div>
-                                    <span>de_inferno</span>
-                                </label>
-                                <label class="map-card" id="map-italy">
-                                    <input type="radio" name="selected-map" value="cs_italy" hidden>
-                                    <div class="map-img-placeholder italy"></div>
-                                    <span>cs_italy</span>
-                                </label>
-                                <label class="map-card" id="map-assault">
-                                    <input type="radio" name="selected-map" value="cs_assault" hidden>
-                                    <div class="map-img-placeholder assault"></div>
-                                    <span>cs_assault</span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="button-group">
-                            <button type="button" id="btn-create-playcs" class="btn primary-btn">
-                                <span>Play-CS.com ilə Yarat</span>
-                            </button>
-                            <button type="button" id="btn-create-csonline" class="btn secondary-btn">
-                                <span>CS-Online.club ilə Yarat</span>
-                            </button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="card glass flex-column justify-center" id="output-card">
-                    <div class="status-placeholder text-center">
-                        <div class="icon-huge">🔗</div>
-                        <h3>Lobby Linki Gözlənilir</h3>
-                        <p>Sol tərəfdəki formanı doldurub platformalardan birini seçin ki, qoşulma linki generatorlansın.</p>
-                    </div>
-                    
-                    <div class="result-area hidden" id="result-area">
-                        <div class="success-badge">OTAQ HAZIRDIR</div>
-                        <h3>Sizin Oyun Otağınız</h3>
-                        <p class="desc">Aşağıdakı linki kopyalayıb iş yoldaşlarınıza göndərin. Hamı eyni linkə daxil olub dərhal oynaya bilər!</p>
-                        
-                        <div class="link-box">
-                            <input type="text" id="generated-url" readonly value="">
-                            <button id="btn-copy" class="btn copy-btn">Kopyala</button>
-                        </div>
-                        
-                        <a href="#" id="btn-join" target="_blank" class="btn action-btn">Oyuna Qoşul ➔</a>
-                    </div>
-                </div>
-            </div>
-        </section>
-
         <!-- Tab 2: Self-Host Browser Client (WASM) -->
-        <section id="self-host-tab" class="tab-content">
+        <section id="self-host-tab" class="tab-content active">
             <div class="card glass">
                 <h2><span class="icon">👾</span> WebXash3D CS 1.6 Client (Brauzerdə Birbaşa)</h2>
                 <p>Bu bölmədə rəsmi WebGL/WebAssembly əsaslı CS 1.6 klienti yerləşdirilib. Oyun sizin brauzerinizdə, tamamilə lokal olaraq işə düşür.</p>
