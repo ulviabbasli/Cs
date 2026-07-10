@@ -76,6 +76,7 @@ cs.example.com
 ## Qara ekran problemi
 
 Engine acilib qara ekran qalirsa, bu adeten server problemi deyil. Browser ZIP fayli natamamdir.
+Singleplayer sehifesi indi ZIP-i yoxlayir: paket natamamdirsa qara ekrana kecmir, catismayan qovluqlari gosterir ve tam `cstrike_game.zip` secmeye imkan verir.
 
 Tam klient data-sinda en azi bunlar olmalidir:
 

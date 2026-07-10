@@ -9,33 +9,47 @@
     <style>
       body, html { margin: 0; padding: 0; background: #0a0a0a; overflow: hidden; }
       #loader-screen {
-        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        position: fixed; inset: 0; width: 100vw; height: 100vh;
         background: radial-gradient(ellipse at center, #1a1a2e 0%, #0a0a0a 100%);
         z-index: 999999;
         display: flex; flex-direction: column; align-items: center; justify-content: center;
-        font-family: 'Segoe UI', Arial, sans-serif; color: #e0e0e0;
+        font-family: Segoe UI, Arial, sans-serif; color: #e0e0e0;
+        padding: 24px; box-sizing: border-box;
       }
       #loader-screen h1 {
-        font-size: 36px; color: #39ff14; text-shadow: 0 0 20px rgba(57,255,20,0.4);
-        margin-bottom: 8px;
+        font-size: clamp(28px, 6vw, 42px); color: #39ff14;
+        text-shadow: 0 0 20px rgba(57,255,20,0.4);
+        margin: 0 0 8px; text-align: center;
       }
-      #loader-screen .subtitle { color: #888; font-size: 14px; margin-bottom: 40px; }
-      #loader-screen .start-btn {
-        padding: 16px 48px; font-size: 20px; font-weight: bold;
+      #loader-screen .subtitle {
+        color: #aaa; font-size: 14px; margin: 0 0 28px; max-width: 720px;
+        text-align: center; line-height: 1.5;
+      }
+      .actions {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+        gap: 12px; max-width: 760px;
+      }
+      .start-btn, .secondary-btn {
+        min-height: 52px; padding: 14px 28px; font-size: 16px; font-weight: 800;
+        border: none; border-radius: 10px; cursor: pointer;
+        transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+      }
+      .start-btn {
         background: linear-gradient(135deg, #39ff14, #00e676); color: #000;
-        border: none; border-radius: 12px; cursor: pointer;
         box-shadow: 0 4px 30px rgba(57,255,20,0.3);
-        transition: transform 0.2s, box-shadow 0.2s;
       }
-      #loader-screen .start-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 6px 40px rgba(57,255,20,0.5);
+      .secondary-btn {
+        background: rgba(255,255,255,0.08); color: #ffb13b;
+        border: 1px solid rgba(255,177,59,0.6);
       }
-      #loader-screen .start-btn:disabled {
-        background: #333; color: #666; cursor: not-allowed;
-        box-shadow: none; transform: none;
+      .start-btn:hover, .secondary-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 38px rgba(57,255,20,0.35);
       }
-      .progress-container { width: 420px; margin-top: 30px; display: none; }
+      .start-btn:disabled, .secondary-btn:disabled {
+        background: #333; color: #777; cursor: not-allowed; box-shadow: none; transform: none;
+      }
+      .progress-container { width: min(520px, 92vw); margin-top: 30px; display: none; }
       .progress-bg {
         width: 100%; height: 22px; background: #1a1a2e;
         border: 1px solid #39ff14; border-radius: 11px; overflow: hidden;
@@ -46,16 +60,31 @@
         border-radius: 11px; transition: width 0.3s ease;
       }
       .status-text { color: #aaa; font-size: 13px; margin-top: 10px; text-align: center; }
-      .error-text { color: #ff4444; font-size: 13px; margin-top: 8px; text-align: center; }
+      .error-text {
+        color: #ff6868; font-size: 13px; margin-top: 12px; text-align: center;
+        max-width: 760px; line-height: 1.5; white-space: pre-line;
+      }
+      .hint {
+        color: #8d96a8; font-size: 12px; line-height: 1.5; text-align: center;
+        max-width: 760px; margin-top: 18px;
+      }
+      #localZipInput { display: none; }
     </style>
   </head>
   <body>
     <div id="app"></div>
 
     <div id="loader-screen">
-      <h1>🎮 COUNTER-STRIKE 1.6</h1>
-      <p class="subtitle">Brauzerdə birbaşa oyna — heç nə yükləmədən!</p>
-      <button class="start-btn" id="startBtn" onclick="window._startGame()">▶ OYUNU BAŞLAT</button>
+      <h1>COUNTER-STRIKE 1.6</h1>
+      <p class="subtitle">
+        Start bundled package, or choose your own legal full <strong>cstrike_game.zip</strong>.
+        A complete ZIP must include cstrike maps, models, sound, sprites, and WAD files.
+      </p>
+      <div class="actions">
+        <button class="start-btn" id="startBtn" type="button">START BUNDLED PACKAGE</button>
+        <button class="secondary-btn" id="chooseZipBtn" type="button">CHOOSE FULL ZIP</button>
+      </div>
+      <input id="localZipInput" type="file" accept=".zip,application/zip" />
       <div class="progress-container" id="progressContainer">
         <div class="progress-bg">
           <div class="progress-fill" id="progressFill"></div>
@@ -63,104 +92,224 @@
         <div class="status-text" id="statusText"></div>
         <div class="error-text" id="errorText"></div>
       </div>
+      <p class="hint">
+        If the bundled package is incomplete, the page will stop before the black screen and ask for a complete ZIP.
+        Do not upload copyrighted game files to a public repository unless you have distribution rights.
+      </p>
     </div>
+
     <script>
-      // Get multiplayer IP from URL parameter if present
       var urlParams = new URLSearchParams(window.location.search);
       var ipParam = urlParams.get('ip');
-      if (ipParam) {
-        window.multiplayerIP = ipParam;
+      if (ipParam) window.multiplayerIP = ipParam;
+
+      var engineLoadPromise = null;
+
+      function setProgress(percent, text) {
+        document.getElementById('progressContainer').style.display = 'block';
+        document.getElementById('progressFill').style.width = percent + '%';
+        document.getElementById('statusText').textContent = text || '';
       }
 
-      window._startGame = async function() {
-        var btn = document.getElementById('startBtn');
-        var progContainer = document.getElementById('progressContainer');
-        var progFill = document.getElementById('progressFill');
-        var statusEl = document.getElementById('statusText');
+      function setError(message) {
         var errorEl = document.getElementById('errorText');
+        errorEl.textContent = message;
+        document.getElementById('progressContainer').style.display = 'block';
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('chooseZipBtn').disabled = false;
+      }
 
-        btn.disabled = true;
-        btn.textContent = 'Yüklənir...';
-        progContainer.style.display = 'block';
-        errorEl.textContent = '';
+      function readU16(data, offset) {
+        return data[offset] | (data[offset + 1] << 8);
+      }
 
-        try {
-          // Step 1: Download all parts of the game ZIP
-          var partsCount = 3;
-          var buffers = [];
-          var totalBytes = 0;
-          
-          for (var i = 1; i <= partsCount; i++) {
-            statusEl.textContent = 'Oyun faylları yüklənir: Hissə ' + i + ' / ' + partsCount + '...';
-            progFill.style.width = Math.round(((i - 1) / partsCount) * 70) + 10 + '%';
+      function readU32(data, offset) {
+        return (data[offset] | (data[offset + 1] << 8) | (data[offset + 2] << 16) | (data[offset + 3] << 24)) >>> 0;
+      }
 
-            var response = await fetch('cs/cstrike_game.part_' + i);
-            if (!response.ok) throw new Error('Hissə ' + i + ' yüklənə bilmədi (HTTP ' + response.status + ')');
-            
-            var buf = await response.arrayBuffer();
-            buffers.push(new Uint8Array(buf));
-            totalBytes += buf.byteLength;
+      function listZipEntries(zipBytes) {
+        var data = zipBytes instanceof Uint8Array ? zipBytes : new Uint8Array(zipBytes);
+        var decoder = new TextDecoder('utf-8');
+        var min = Math.max(0, data.length - 66000);
+        var eocd = -1;
+        for (var p = data.length - 22; p >= min; p--) {
+          if (readU32(data, p) === 0x06054b50) {
+            eocd = p;
+            break;
           }
+        }
+        if (eocd === -1) throw new Error('ZIP arxivi oxunmadi. Fayl zedeli ola biler.');
 
-          progFill.style.width = '82%';
-          statusEl.textContent = 'Fayllar birləşdirilir...';
+        var totalEntries = readU16(data, eocd + 10);
+        var centralDirOffset = readU32(data, eocd + 16);
+        var entries = [];
+        var offset = centralDirOffset;
 
-          // Combine chunks
-          var zipData = new Uint8Array(totalBytes);
-          var pos = 0;
-          for (var c of buffers) { zipData.set(c, pos); pos += c.length; }
-          buffers = null;
+        for (var i = 0; i < totalEntries; i++) {
+          if (readU32(data, offset) !== 0x02014b50) break;
+          var nameLen = readU16(data, offset + 28);
+          var extraLen = readU16(data, offset + 30);
+          var commentLen = readU16(data, offset + 32);
+          var nameStart = offset + 46;
+          var name = decoder.decode(data.slice(nameStart, nameStart + nameLen)).replace(/\\/g, '/').toLowerCase();
+          entries.push(name);
+          offset = nameStart + nameLen + extraLen + commentLen;
+        }
+        return entries;
+      }
 
-          progFill.style.width = '88%';
-          statusEl.textContent = 'WebXash mühərriki yüklənir...';
+      function hasEntry(entries, expected) {
+        expected = expected.toLowerCase();
+        return entries.some(function(entry) {
+          return entry === expected || entry.startsWith(expected + '/') || entry.startsWith(expected);
+        });
+      }
 
-          // Step 2: Set scriptDir for CS mode
-          window.scriptDir = 'cs/';
+      function validateGameZip(zipBytes) {
+        var entries = listZipEntries(zipBytes);
+        var required = [
+          'cstrike/liblist.gam',
+          'cstrike/cstrike.wad',
+          'cstrike/maps/',
+          'cstrike/models/',
+          'cstrike/sound/',
+          'cstrike/sprites/',
+          'valve/'
+        ];
+        var missing = required.filter(function(item) { return !hasEntry(entries, item); });
+        if (missing.length) {
+          throw new Error(
+            'Bu ZIP tam CS 1.6 klient paketi deyil. Catismayan hisseler:\n- ' +
+            missing.join('\n- ') +
+            '\n\nTam CS 1.6 qovlugundan cstrike ve valve qovluqlarini birlikde ZIP edin, sonra "CHOOSE FULL ZIP" ile secin.'
+          );
+        }
+      }
 
-          // Step 3: Load Vue/WebXash app
+      async function detectPartCount() {
+        var count = 0;
+        for (var i = 1; i <= 20; i++) {
+          var response = await fetch('cs/cstrike_game.part_' + i, { method: 'HEAD' });
+          if (!response.ok) break;
+          count++;
+        }
+        return count;
+      }
+
+      async function downloadBundledZip() {
+        var partsCount = await detectPartCount();
+        if (!partsCount) throw new Error('Bundled oyun paketi tapilmadi.');
+
+        var buffers = [];
+        var totalBytes = 0;
+        for (var i = 1; i <= partsCount; i++) {
+          setProgress(Math.round(((i - 1) / partsCount) * 70) + 10, 'Oyun fayllari yuklenir: hisse ' + i + ' / ' + partsCount);
+          var response = await fetch('cs/cstrike_game.part_' + i);
+          if (!response.ok) throw new Error('Hisse ' + i + ' yuklene bilmedi (HTTP ' + response.status + ')');
+          var buf = await response.arrayBuffer();
+          buffers.push(new Uint8Array(buf));
+          totalBytes += buf.byteLength;
+        }
+
+        setProgress(82, 'Fayllar birlesdirilir...');
+        var zipData = new Uint8Array(totalBytes);
+        var pos = 0;
+        for (var c = 0; c < buffers.length; c++) {
+          zipData.set(buffers[c], pos);
+          pos += buffers[c].length;
+        }
+        return zipData;
+      }
+
+      function ensureEngineLoaded() {
+        if (engineLoadPromise) return engineLoadPromise;
+        window.scriptDir = 'cs/';
+        engineLoadPromise = new Promise(function(resolve, reject) {
           var script = document.createElement('script');
           script.type = 'module';
           script.crossOrigin = '';
           script.src = './assets/index-qQhwzMp6.js';
+          script.onload = resolve;
+          script.onerror = function() { reject(new Error('WebXash muherriki yuklene bilmedi.')); };
           document.head.appendChild(script);
+        });
+        return engineLoadPromise;
+      }
 
-          // Step 4: Wait for Vue app and file input
-          var fileInput = null;
-          for (var attempt = 0; attempt < 60; attempt++) {
-            await new Promise(function(r) { setTimeout(r, 300); });
-            fileInput = document.querySelector('input[type="file"][accept=".zip"]');
-            if (fileInput) break;
-          }
-          if (!fileInput) throw new Error('Mühərrik yüklənə bilmədi!');
-
-          progFill.style.width = '94%';
-          statusEl.textContent = 'Oyun mühərrikə ötürülür...';
-
-          // Step 5: Feed ZIP to the Open ZIP handler
-          var blob = new Blob([zipData], { type: 'application/zip' });
-          zipData = null;
-          var file = new File([blob], 'cstrike_game.zip', { type: 'application/zip' });
-
-          var dt = new DataTransfer();
-          dt.items.add(file);
-          fileInput.files = dt.files;
-          fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-
-          progFill.style.width = '100%';
-          statusEl.textContent = 'Counter-Strike 1.6 başladılır...';
-
-          // We don't hide the loader automatically so the user can see any console output during startup
-          setTimeout(function() {
-            document.getElementById('loader-screen').style.display = 'none';
-          }, 8000);
-
-        } catch(err) {
-          errorEl.textContent = 'Xəta: ' + err.message;
-          btn.disabled = false;
-          btn.textContent = '🔄 Yenidən Cəhd Et';
-          progContainer.style.display = 'none';
+      async function waitForEngineZipInput() {
+        for (var attempt = 0; attempt < 80; attempt++) {
+          await new Promise(function(resolve) { setTimeout(resolve, 250); });
+          var fileInput = document.querySelector('#app input[type="file"][accept=".zip"]');
+          if (fileInput) return fileInput;
         }
-      };
+        throw new Error('WebXash ZIP input-u tapilmadi.');
+      }
+
+      async function feedZipToEngine(file) {
+        setProgress(88, 'WebXash muherriki yuklenir...');
+        await ensureEngineLoaded();
+        var fileInput = await waitForEngineZipInput();
+
+        setProgress(94, 'Oyun paketi muherrike oturulur...');
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+
+        setProgress(100, 'Counter-Strike 1.6 basladilir...');
+        setTimeout(function() {
+          document.getElementById('loader-screen').style.display = 'none';
+        }, 5000);
+      }
+
+      async function startWithBundledPackage() {
+        var startBtn = document.getElementById('startBtn');
+        var chooseBtn = document.getElementById('chooseZipBtn');
+        startBtn.disabled = true;
+        chooseBtn.disabled = true;
+        document.getElementById('errorText').textContent = '';
+
+        try {
+          var zipData = await downloadBundledZip();
+          setProgress(86, 'ZIP yoxlanilir...');
+          validateGameZip(zipData);
+          var file = new File([new Blob([zipData], { type: 'application/zip' })], 'cstrike_game.zip', { type: 'application/zip' });
+          await feedZipToEngine(file);
+        } catch (error) {
+          setError('Xeta: ' + error.message);
+        }
+      }
+
+      async function startWithLocalZip(file) {
+        if (!file) return;
+        var startBtn = document.getElementById('startBtn');
+        var chooseBtn = document.getElementById('chooseZipBtn');
+        startBtn.disabled = true;
+        chooseBtn.disabled = true;
+        document.getElementById('errorText').textContent = '';
+
+        try {
+          setProgress(20, 'Secilmis ZIP oxunur...');
+          var data = new Uint8Array(await file.arrayBuffer());
+          setProgress(45, 'ZIP yoxlanilir...');
+          validateGameZip(data);
+          await feedZipToEngine(new File([file], 'cstrike_game.zip', { type: 'application/zip' }));
+        } catch (error) {
+          setError('Xeta: ' + error.message);
+        }
+      }
+
+      document.getElementById('startBtn').addEventListener('click', startWithBundledPackage);
+      document.getElementById('chooseZipBtn').addEventListener('click', function() {
+        document.getElementById('localZipInput').click();
+      });
+      document.getElementById('localZipInput').addEventListener('change', function(event) {
+        startWithLocalZip(event.target.files && event.target.files[0]);
+      });
+
+      if (urlParams.get('mode') === 'local') {
+        document.getElementById('statusText').textContent = 'Tam cstrike_game.zip secin.';
+      }
     </script>
   </body>
 </html>

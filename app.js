@@ -99,6 +99,31 @@ docker compose logs -f</code></pre>
         `;
     }
 
+    const singleplayerBox = document.querySelector('.singleplayer-box');
+    if (singleplayerBox) {
+        singleplayerBox.innerHTML = `
+            <div>
+                <h3 style="font-family: Orbitron, sans-serif; color: #ff9800; margin-bottom: 12px; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
+                    <span>SP</span> Tek Neferlik Oyun (Singleplayer)
+                </h3>
+                <p style="font-size: 0.85rem; color: #aaa; line-height: 1.4; margin-bottom: 14px;">
+                    Qara ekranin sebebi natamam oyun paketidir. Bundled paket yoxlanacaq; tam deyilse, oz legal <code>cstrike_game.zip</code> faylini sece bilersen.
+                </p>
+                <p style="font-size: 0.78rem; color: #777; line-height: 1.4; margin-bottom: 20px;">
+                    Tam ZIP-de <code>cstrike/maps</code>, <code>models</code>, <code>sound</code>, <code>sprites</code> ve <code>valve</code> olmalidir.
+                </p>
+            </div>
+            <div style="display: grid; gap: 10px;">
+                <a href="./engine/index.html" target="_blank" class="btn secondary-btn" style="display: block; width: 100%; padding: 12px; font-weight: bold; border-radius: 6px; text-decoration: none; text-align: center; border-color: #ff9800; color: #ff9800; box-sizing: border-box;">
+                    Bundled Paketi Yoxla
+                </a>
+                <a href="./engine/index.html?mode=local" target="_blank" class="btn secondary-btn" style="display: block; width: 100%; padding: 12px; font-weight: bold; border-radius: 6px; text-decoration: none; text-align: center; border-color: #39ff14; color: #39ff14; box-sizing: border-box;">
+                    Tam ZIP Secerek Baslat
+                </a>
+            </div>
+        `;
+    }
+
 
 
     // ----------------------------------------------------
