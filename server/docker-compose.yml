@@ -28,13 +28,20 @@ services:
       LOG_LEVEL: info
     expose:
       - "${BRIDGE_PORT:-27016}"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://127.0.0.1:' + (process.env.PORT || 27016) + '/health', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   caddy:
     image: caddy:2-alpine
     container_name: cs16-caddy
     restart: unless-stopped
     depends_on:
-      - bridge
+      bridge:
+        condition: service_healthy
     environment:
       DOMAIN: ${DOMAIN}
       ACME_EMAIL: ${ACME_EMAIL}

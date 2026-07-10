@@ -1,0 +1,4 @@
+hlds-data
+*.log
+Dockerfile
+.dockerignore

@@ -1,0 +1,31 @@
+name: Docker build
+
+on:
+  push:
+    paths:
+      - "server/**"
+      - ".github/workflows/docker-build.yml"
+  pull_request:
+    paths:
+      - "server/**"
+      - ".github/workflows/docker-build.yml"
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate compose file
+        working-directory: server
+        run: docker compose config
+
+      - name: Build bridge image
+        working-directory: server
+        run: docker compose build bridge
+
+      - name: Build HLDS image
+        working-directory: server
+        run: docker compose build cs-server

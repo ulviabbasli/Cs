@@ -22,18 +22,25 @@ GitHub Pages server prosesi isletmir. Ona gore GitHub yalniz HTML/JS/WASM klient
 
 ## VPS serveri hazirlamaq
 
-VPS-de Docker ve Docker Compose plugin lazimdir.
+VPS-de Docker olmasa deploy script onu avtomatik quracaq.
 
 ```bash
 git clone https://github.com/ulviabbasli/Cs.git
 cd Cs/server
-cp .env.example .env
-nano .env
-docker compose up -d --build
-docker compose logs -f
+sudo bash scripts/deploy.sh cs.example.com you@example.com
 ```
 
-`.env` faylinda bunlari deyis:
+Bu komanda bunlari edir:
+
+- Docker ve Docker Compose plugin yoxdursa qurur.
+- `.env` yaradir.
+- Caddy ile HTTPS/WSS qurur.
+- HLDS CS 1.6 server image-ni build edir.
+- WebSocket -> UDP bridge image-ni build edir.
+- Stack-i `docker compose up -d --build` ile qaldirir.
+- Health check edir.
+
+Sonradan ayarlari deyismek istesen:
 
 ```env
 DOMAIN=cs.example.com
@@ -42,7 +49,7 @@ SERVER_NAME=Office CS 1.6
 RCON_PASSWORD=change-this
 ```
 
-DNS-de `DOMAIN` VPS IP-sine yonelmelidir. Browser klient ucun firewall-da `80/tcp` ve `443/tcp` aciq olmalidir. Native CS klientler de qoslacaqsa `27015/udp` ac.
+DNS-de `DOMAIN` VPS IP-sine yonelmelidir. Browser klient ucun firewall-da `80/tcp` ve `443/tcp` aciq olmalidir. Script UFW aktivdirse bu portlari avtomatik allow edir. Native CS klientler de qoslacaqsa `27015/udp` ac.
 
 Health check:
 
@@ -97,4 +104,11 @@ Daha detallı VPS telimati:
 
 ```text
 server/README.md
+```
+
+Yenileme ucun VPS-de:
+
+```bash
+cd Cs/server
+sudo bash scripts/update.sh
 ```
