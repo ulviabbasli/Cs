@@ -1,0 +1,14 @@
+# Local server/runtime data
+server/hlds-data/
+server/caddy-data/
+server/caddy-config/
+server/**/*.log
+
+# Dependencies and local artifacts
+node_modules/
+*.zip
+*.part
+
+# OS/editor noise
+.DS_Store
+Thumbs.db

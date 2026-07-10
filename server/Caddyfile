@@ -1,0 +1,15 @@
+{
+	email {$ACME_EMAIL}
+}
+
+{$DOMAIN} {
+	encode zstd gzip
+
+	@websocket path /websocket
+	reverse_proxy @websocket bridge:{$BRIDGE_PORT}
+
+	@health path /health
+	reverse_proxy @health bridge:{$BRIDGE_PORT}
+
+	respond / "CS 1.6 WebSocket bridge is running. Use /websocket from the browser client." 200
+}

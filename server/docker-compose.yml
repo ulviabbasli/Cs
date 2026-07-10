@@ -1,0 +1,48 @@
+services:
+  cs-server:
+    build:
+      context: ./hlds
+    container_name: cs16-hlds
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-Office CS 1.6}
+      START_MAP: ${START_MAP:-de_dust2}
+      MAXPLAYERS: ${MAXPLAYERS:-16}
+      RCON_PASSWORD: ${RCON_PASSWORD:-change-this-rcon-password}
+    volumes:
+      - ./hlds-data:/opt/hlds
+    ports:
+      - "${HLDS_PORT:-27015}:27015/udp"
+
+  bridge:
+    build:
+      context: ./bridge
+    container_name: cs16-websocket-bridge
+    restart: unless-stopped
+    depends_on:
+      - cs-server
+    environment:
+      PORT: ${BRIDGE_PORT:-27016}
+      UDP_HOST: cs-server
+      UDP_PORT: 27015
+      LOG_LEVEL: info
+    expose:
+      - "${BRIDGE_PORT:-27016}"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: cs16-caddy
+    restart: unless-stopped
+    depends_on:
+      - bridge
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+      BRIDGE_PORT: ${BRIDGE_PORT:-27016}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-data:/data
+      - ./caddy-config:/config
